@@ -3,12 +3,9 @@ from typing import Optional
 import random
 
 class ClayBot:
-    def __init__(self, perplexity_api_key: str):
+    def __init__(self, perplexity_api_key: str = None):
+        # If no API key provided, it will be handled in the chat method
         self.api_key = perplexity_api_key
-        self.headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
         
         # Casual conversation patterns
         self.greetings = {
@@ -19,6 +16,20 @@ class ClayBot:
             'what\'s up', 'how\'s it going', 'hows it going'
         }
     
+    def _get_headers(self, st_secrets=None):
+        """Get headers with API key from either instance or st.secrets."""
+        if self.api_key:
+            auth_token = self.api_key
+        elif st_secrets and "PERPLEXITY_API_KEY" in st_secrets:
+            auth_token = st_secrets["PERPLEXITY_API_KEY"]
+        else:
+            raise ValueError("No Perplexity API key found in environment or Streamlit secrets")
+            
+        return {
+            "Authorization": f"Bearer {auth_token}",
+            "Content-Type": "application/json"
+        }
+    
     def _is_greeting(self, text: str) -> bool:
         """Check if the input is a casual greeting."""
         return text.lower().strip('?!. ') in self.greetings
@@ -27,7 +38,7 @@ class ClayBot:
         """Check if the input is asking how the bot is doing."""
         return text.lower().strip('?!. ') in self.how_are_you or any(phrase in text.lower() for phrase in self.how_are_you)
     
-    def chat(self, query: str) -> str:
+    def chat(self, query: str, st_secrets=None) -> str:
         """
         Handle both casual conversation and Clay-related queries.
         """
@@ -42,9 +53,12 @@ class ClayBot:
             # For other queries, search Clay.com
             focused_query = f'Search specifically on Clay.com (the business platform website) and answer: {query}'
             
+            # Get headers with API key
+            headers = self._get_headers(st_secrets)
+            
             response = requests.post(
                 "https://api.perplexity.ai/chat/completions",
-                headers=self.headers,
+                headers=headers,
                 json={
                     "model": "llama-3.1-sonar-small-128k-online",
                     "messages": [
@@ -91,6 +105,9 @@ Remember: You're Claygent, a helpful and friendly assistant who loves helping pe
                 print(f"API Error: {response.status_code} - {response.text}")
                 return "Oops, my circuits got a bit tangled! Mind trying that question again?"
                 
+        except ValueError as ve:
+            print(f"API Key Error: {str(ve)}")
+            return "I'm having trouble accessing my knowledge. Please make sure my API key is properly configured!"
         except Exception as e:
             print(f"Error in chat: {str(e)}")
             return "Looks like I hit a bump in the clay road. Could you try asking that again?"

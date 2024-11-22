@@ -4,9 +4,6 @@ import os
 from dotenv import load_dotenv
 import random
 
-# Load environment variables
-load_dotenv()
-
 # Fun loading messages
 LOADING_MESSAGES = [
     "Molding your answer...",
@@ -21,10 +18,9 @@ LOADING_MESSAGES = [
     "Mixing in some AI magic..."
 ]
 
-# Check for API key
-if not os.getenv("PERPLEXITY_API_KEY"):
-    st.error("Error: PERPLEXITY_API_KEY not found in environment variables.")
-    st.stop()
+# Try to load API key from environment first
+load_dotenv()
+api_key = os.getenv("PERPLEXITY_API_KEY")
 
 # Page config
 st.set_page_config(
@@ -75,9 +71,8 @@ if "messages" not in st.session_state:
 
 if "chatbot" not in st.session_state:
     try:
-        st.session_state.chatbot = ClayBot(
-            perplexity_api_key=os.getenv("PERPLEXITY_API_KEY")
-        )
+        # Initialize with API key from environment if available
+        st.session_state.chatbot = ClayBot(api_key)
     except Exception as e:
         st.error(f"Error initializing: {str(e)}")
         st.stop()
@@ -88,7 +83,7 @@ def main():
     # Add a friendly welcome message
     st.markdown("""
     <div class="welcome-text">
-    I'm Clay's other, more friendly AI assistant, ready to help shape your business's future! Whether you want to learn about our platform or just chat, I'm here for you.
+    I'm Clay's AI assistant, ready to help shape your business's future! Whether you want to learn about our platform or just chat, I'm here for you.
     </div>
     <div class="subheader">
     Feel free to say hi or ask me anything about how we can help your business grow.
@@ -111,7 +106,8 @@ def main():
         with st.chat_message("assistant"):
             with st.spinner(random.choice(LOADING_MESSAGES)):
                 try:
-                    response = st.session_state.chatbot.chat(prompt)
+                    # Pass st.secrets to the chat method
+                    response = st.session_state.chatbot.chat(prompt, st.secrets if not api_key else None)
                     st.markdown(response)
                     st.session_state.messages.append({"role": "assistant", "content": response})
                 except Exception as e:
