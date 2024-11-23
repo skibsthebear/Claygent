@@ -4,18 +4,18 @@ import os
 from dotenv import load_dotenv
 import random
 
-# Fun loading messages
+# Fun loading messages that reflect being part of the team
 LOADING_MESSAGES = [
-    "Molding your answer...",
-    "Spinning the clay wheel...",
-    "Shaping the perfect response...",
-    "Firing up the knowledge kiln...",
-    "Crafting something special...",
-    "Turning the gears...",
-    "Mining the data clay...",
-    "Sculpting your solution...",
-    "Polishing the details...",
-    "Mixing in some AI magic..."
+    "Let me check our knowledge base...",
+    "Connecting with our platform...",
+    "Looking through our features...",
+    "Checking our latest updates...",
+    "Searching our documentation...",
+    "Gathering the best information for you...",
+    "Finding the perfect solution...",
+    "Consulting our best practices...",
+    "Reviewing our platform capabilities...",
+    "Crafting the perfect response..."
 ]
 
 # Try to load API key from environment first
@@ -80,13 +80,13 @@ if "chatbot" not in st.session_state:
 def main():
     st.title("👋 Hi, I'm Claygent!")
     
-    # Add a friendly welcome message
+    # Add a friendly welcome message that emphasizes being part of the team
     st.markdown("""
     <div class="welcome-text">
-    I'm Clay's AI assistant, ready to help shape your business's future! Whether you want to learn about our platform or just chat, I'm here for you.
+    I'm part of the Clay team, and I love helping our users succeed with our platform! Whether you want to learn about our features or just chat about how we can help your business grow, I'm here for you.
     </div>
     <div class="subheader">
-    Feel free to say hi or ask me anything about how we can help your business grow.
+    Feel free to say hi or ask me anything about our platform and how we can help you achieve your goals.
     </div>
     """, unsafe_allow_html=True)
     
@@ -96,7 +96,7 @@ def main():
             st.markdown(message["content"])
     
     # Chat input
-    if prompt := st.chat_input("Chat with me about Clay or just say hi!"):
+    if prompt := st.chat_input("How can I help you with Clay today?"):
         # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
@@ -111,7 +111,7 @@ def main():
                     st.markdown(response)
                     st.session_state.messages.append({"role": "assistant", "content": response})
                 except Exception as e:
-                    error_message = "Oops, looks like I hit a bump in the clay road! Could you try asking that again?"
+                    error_message = "I'm having a bit of trouble accessing our systems. Could you try asking that again?"
                     st.error(error_message)
                     st.session_state.messages.append({"role": "assistant", "content": error_message})
 
